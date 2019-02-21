@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baizhi.ems.dao.EmployeeDao">
+    <!-- Employee的resultMap,column是给数据库列起的别名,它对应property类的属性-->
+    <resultMap id="result_Employee_Map" type="com.baizhi.ems.entity.Employee">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="salary" property="salary" />
+        <result column="age" property="age" />
+    </resultMap>
+
+    <!-- 数据库中表名为:employee的列名,as前是数据库的列明,as后是列的别名用于映射成实体类中的属性,需要注意的是别名必须与resultMap中的column别名一致 -->
+    <sql id="employee_Column">
+        employee.id as id
+        ,employee.name as name
+        ,employee.salary as salary
+        ,employee.age as age
+    </sql>
+
+    <!--获得类名为:Employee对应的数据库表的数据总行数 -->
+    <select id="getEmployeeRowCount" resultType="java.lang.Long">
+        select count(id) from employee
+    </select>
+    <!-- 获得类名为:Employee对应数据库中表的数据集合 -->
+    <select id="selectEmployee" resultMap="result_Employee_Map">
+        select 
+        <include refid="employee_Column" /> 
+        from employee
+    </select> 
+
+    <!-- 获得一个Employee对象,以参数Employee对象中不为空的属性作为条件进行查询-->
+    <select id="selectEmployeeByObj" parameterType="com.baizhi.ems.entity.Employee" resultMap="result_Employee_Map">
+        select 
+            <include refid="employee_Column" /> 
+        from employee
+        <where>
+            <if test="age != null "> and employee.age = #{age}</if>
+            <if test="salary != null "> and employee.salary = #{salary}</if>
+            <if test="name != null "> and employee.name = #{name}</if>
+            <if test="id != null "> and employee.id = #{id}</if>
+        </where>
+    </select> 
+
+    <!-- 通过Employee的id获得对应数据库中表的数据对象-->
+    <select id="selectEmployeeById" parameterType="java.lang.Integer" resultMap="result_Employee_Map">
+        select 
+            <include refid="employee_Column" /> 
+        from employee
+        where employee.id = #{id}
+    </select> 
+
+    <!-- 将Employee插入到对应数据库的表中,包括属性值为null的数据-->
+
+    <insert id="insertEmployee" parameterType="com.baizhi.ems.entity.Employee">
+        insert into employee(id,name,salary,age) 
+        values(#{id},#{name},#{salary},#{age})
+    </insert>
+
+    <!-- 将Employee中属性值不为null的数据,插入到对应数据库的表中-->
+    <insert id="insertNonEmptyEmployee" parameterType="com.baizhi.ems.entity.Employee">
+        insert into employee
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            <if test="name != null">name,</if>
+            <if test="salary != null">salary,</if>
+            <if test="age != null">age,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            0,
+            <if test="name != null"> #{name},</if>
+            <if test="salary != null"> #{salary},</if>
+            <if test="age != null"> #{age},</if>
+        </trim>
+    </insert>
+
+    <!-- 通过Employee的id将数据库表中对应的数据删除-->
+    <delete id="deleteEmployeeById" parameterType="java.lang.Integer">
+        delete from employee
+        where id = #{id}
+    </delete>
+
+    <!-- 通过Employee的id将Employee的数据更新到数据库中对应的表,包括值null的数据-->
+    <update id="updateEmployeeById" parameterType="com.baizhi.ems.entity.Employee">
+        update employee set
+            name=#{name}
+            ,salary=#{salary}
+            ,age=#{age}
+        where id=#{id}
+    </update>
+
+    <!-- 通过Employee的id将Employee中属性值不为null的数据更新到数据库对应的表中-->
+    <update id="updateNonEmptyEmployeeById" parameterType="com.baizhi.ems.entity.Employee">
+        update employee
+        <set>
+            <if test="name != null">
+                name=#{name},
+            </if>
+            <if test="salary != null">
+                salary=#{salary},
+            </if>
+            <if test="age != null">
+                age=#{age},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>

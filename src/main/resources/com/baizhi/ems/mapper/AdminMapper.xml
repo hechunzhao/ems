@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.baizhi.ems.dao.AdminDao">
+    <!-- Admin的resultMap,column是给数据库列起的别名,它对应property类的属性-->
+    <resultMap id="result_Admin_Map" type="com.baizhi.ems.entity.Admin">
+        <id column="id" property="id" />
+        <result column="userName" property="username" />
+        <result column="realName" property="realname" />
+        <result column="pwd" property="pwd" />
+        <result column="gender" property="gender" />
+    </resultMap>
+
+    <!-- 数据库中表名为:admin的列名,as前是数据库的列明,as后是列的别名用于映射成实体类中的属性,需要注意的是别名必须与resultMap中的column别名一致 -->
+    <sql id="admin_Column">
+        admin.id as id
+        ,admin.userName as userName
+        ,admin.realName as realName
+        ,admin.pwd as pwd
+        ,admin.gender as gender
+    </sql>
+
+    <!--获得类名为:Admin对应的数据库表的数据总行数 -->
+    <select id="getAdminRowCount" resultType="java.lang.Long">
+        select count(id) from admin
+    </select>
+    <!-- 获得类名为:Admin对应数据库中表的数据集合 -->
+    <select id="selectAdmin" resultMap="result_Admin_Map">
+        select 
+        <include refid="admin_Column" /> 
+        from admin
+    </select> 
+
+    <!-- 获得一个Admin对象,以参数Admin对象中不为空的属性作为条件进行查询-->
+    <select id="selectAdminByObj" parameterType="com.baizhi.ems.entity.Admin" resultMap="result_Admin_Map">
+        select 
+            <include refid="admin_Column" /> 
+        from admin
+        <where>
+            <if test="gender != null "> and admin.gender = #{gender}</if>
+            <if test="pwd != null "> and admin.pwd = #{pwd}</if>
+            <if test="realname != null "> and admin.realName = #{realname}</if>
+            <if test="username != null "> and admin.userName = #{username}</if>
+            <if test="id != null "> and admin.id = #{id}</if>
+        </where>
+    </select> 
+
+    <!-- 通过Admin的id获得对应数据库中表的数据对象-->
+    <select id="selectAdminById" parameterType="java.lang.Integer" resultMap="result_Admin_Map">
+        select 
+            <include refid="admin_Column" /> 
+        from admin
+        where admin.id = #{id}
+    </select> 
+
+    <!-- 将Admin插入到对应数据库的表中,包括属性值为null的数据-->
+
+    <insert id="insertAdmin" parameterType="com.baizhi.ems.entity.Admin">
+        insert into admin(id,userName,realName,pwd,gender) 
+        values(#{id},#{username},#{realname},#{pwd},#{gender})
+    </insert>
+
+    <!-- 将Admin中属性值不为null的数据,插入到对应数据库的表中-->
+    <insert id="insertNonEmptyAdmin" parameterType="com.baizhi.ems.entity.Admin">
+        insert into admin
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            id,
+            <if test="username != null">userName,</if>
+            <if test="realname != null">realName,</if>
+            <if test="pwd != null">pwd,</if>
+            <if test="gender != null">gender,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            0,
+            <if test="username != null"> #{username},</if>
+            <if test="realname != null"> #{realname},</if>
+            <if test="pwd != null"> #{pwd},</if>
+            <if test="gender != null"> #{gender},</if>
+        </trim>
+    </insert>
+
+    <!-- 通过Admin的id将数据库表中对应的数据删除-->
+    <delete id="deleteAdminById" parameterType="java.lang.Integer">
+        delete from admin
+        where id = #{id}
+    </delete>
+
+    <!-- 通过Admin的id将Admin的数据更新到数据库中对应的表,包括值null的数据-->
+    <update id="updateAdminById" parameterType="com.baizhi.ems.entity.Admin">
+        update admin set
+            userName=#{username}
+            ,realName=#{realname}
+            ,pwd=#{pwd}
+            ,gender=#{gender}
+        where id=#{id}
+    </update>
+
+    <!-- 通过Admin的id将Admin中属性值不为null的数据更新到数据库对应的表中-->
+    <update id="updateNonEmptyAdminById" parameterType="com.baizhi.ems.entity.Admin">
+        update admin
+        <set>
+            <if test="username != null">
+                userName=#{username},
+            </if>
+            <if test="realname != null">
+                realName=#{realname},
+            </if>
+            <if test="pwd != null">
+                pwd=#{pwd},
+            </if>
+            <if test="gender != null">
+                gender=#{gender},
+            </if>
+        </set>
+        where id=#{id}
+    </update>
+
+</mapper>
